@@ -18,6 +18,8 @@
  */
 
 #include "embedvm.h"
+// Используем часть значения(val),которая покрыта маской(mask)(required to be all zeros
+//followed by all ones) as a signed value (two's complement)"""
 
 static inline int16_t signext(uint16_t val, uint16_t mask)
 {
@@ -26,14 +28,17 @@ static inline int16_t signext(uint16_t val, uint16_t mask)
 		val |= ~mask;
 	return val;
 }
-
+// extern func_ispoln1InstrVm_sPtrStrctEmbedvm_sRV
 extern void embedvm_exec(struct embedvm_s *vm)
-{
+{   // Получаем значение:UI8 - число опкод-операции из памяти ,которая выделена в host окружении,в файле evmdemo.c 
+    //посредством 'выделения' из структуры,компаненты байт-интерпритатора ip и user_ctx,которая выделена и 
+    //инициализирована в том же файле - evmdemo.c
 	uint8_t opcode = vm->mem_read(vm->ip, false, vm->user_ctx);
 	uint16_t addr = 0;
+    // операнды:I16 для арифметических,побитовых,логических операций
 	int16_t a = 0, b = 0;
 	int8_t sfa = 0;
-
+    // тестируем  опкод-операции для байт-интерпритатора
 	switch (opcode)
 	{
 	case 0x00 ... 0x3f:
@@ -46,11 +51,16 @@ extern void embedvm_exec(struct embedvm_s *vm)
 		embedvm_local_write(vm, sfa, embedvm_pop(vm));
 		vm->ip++;
 		break;
-	case 0x80+0 ... 0x80+11:
-	case 0xa8+0 ... 0xa8+5:
+	case 0x80+0 ... 0x80+11:.//случай(128...139)(dec)
+
+	case 0xa8+0 ... 0xa8+5: 
+/*
+            //случай  (168...173)(dec) сложение,вычитание,умножение,деление,деление по модулю(выявление остатка)
+*/
+
 		b = embedvm_pop(vm);
 	case 0x80+12 ... 0x80+14:
-		a = embedvm_pop(vm);
+		a = embedvm_pop(vm);//случай (140...142)(dec) побитовое не,арифмет. инверсия,логическое не
 		switch (opcode)
 		{
 			case 0x80 +  0: embedvm_push(vm, a + b);  break;
@@ -283,17 +293,21 @@ void embedvm_interrupt(struct embedvm_s *vm, uint16_t addr)
 	vm->sfp = vm->sp;
 	vm->ip = addr;
 }
-
+// func_staskivaetSoSteksVm_sPtrStrctEmbedvmRI2
+// f принимает компанент байт-интерпритатора и 'вытскивает' оттуда sp, user_ctx
 int16_t embedvm_pop(struct embedvm_s *vm)
-{
+{    
+    // по адресу выраженному через sp получаем значение - это значение элемента с вершины стека:I16
 	int16_t value = vm->mem_read(vm->sp, true, vm->user_ctx);
 	vm->sp += 2;
 	return value;
 }
-
+// func_zatalkivaetNaStekZnach_sPtrStrctEmbedvmI2RI2
+// f принимает компанент байт-интерпритатора и 'вытскивает' оттуда sp, user_ctx
 void embedvm_push(struct embedvm_s *vm, int16_t value)
 {
 	vm->sp -= 2;
+    // по адресу addr выраженному через sp пишем значение:I16
 	vm->mem_write(vm->sp, value, true, vm->user_ctx);
 }
 

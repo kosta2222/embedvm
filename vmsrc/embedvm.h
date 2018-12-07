@@ -26,9 +26,17 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
+// strct_component_embedvm_s
+// В компаненте байт-интерпритатора содержится:
+//указатель инструкций,потом инициализируем:=65_536 числом в файле evmdemo.c
+//указатель вверха стека ,потом инициализируем:=0 числом в файле evmdemo.c
+//указатель кадра в стеке,потом инициализируем:=0 в файле evmdemo.c
+//void *user_ctx,потом инициализируем :=NULL в файле evmdemo.c
+//host функции чтение памяти,запись памяти,вызов пользовательских процедур
+//потом реализуем их в host окружении в файле evmdemo.c
 struct embedvm_s
 {
+    //I2_ip,I2_sp,I2_sfp
 	uint16_t ip, sp, sfp;
 	void *user_ctx;
 
@@ -36,11 +44,12 @@ struct embedvm_s
 	void (*mem_write)(uint16_t addr, int16_t value, bool is16bit, void *ctx);
 	int16_t (*call_user)(uint8_t funcid, uint8_t argc, int16_t *argv, void *ctx);
 };
-
+// extern func_ispoln1InstrVm_sPtrStrctEmbedvmRV
 extern void embedvm_exec(struct embedvm_s *vm);
 extern void embedvm_interrupt(struct embedvm_s *vm, uint16_t addr);
-
+// func_staskivaetSoSteksVm_sPtrStrctEmbedvm_sRI2
 int16_t embedvm_pop(struct embedvm_s *vm);
+// func_zatalkivaetNaStekZnach_sPtrStrctEmbedvmI2RI2
 void embedvm_push(struct embedvm_s *vm, int16_t value);
 
 int16_t embedvm_local_read(struct embedvm_s *vm, int8_t sfa);

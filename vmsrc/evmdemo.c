@@ -25,13 +25,14 @@
 #define UNUSED __attribute__((unused))
 
 static bool stop;
-static uint8_t memory[64*1024];
+// Байт интерпритатор адресуется 64K памяти = 65_536 байт
+static uint8_t memory[64*1024];// память размером 65_536 байт
 
 static int16_t mem_read(uint16_t addr, bool is16bit, void *ctx UNUSED)
 {
 	if (is16bit)
 		return (memory[addr] << 8) | memory[addr+1];
-	return memory[addr];
+	return memory[addr];// :I16 - значение  по адресу addr
 }
 
 static void mem_write(uint16_t addr, int16_t value, bool is16bit, void *ctx UNUSED)
@@ -67,7 +68,12 @@ static int16_t call_user(uint8_t funcid, uint8_t argc, int16_t *argv, void *ctx 
 
 	return ret ^ funcid;
 }
-
+// Инициализируем компаненту байт-интерпритатора
+//указатель инструкций:=65_536 числом 
+//указатель вверха стека:=0 числом
+//указатель кадра в стеке:=0
+//void *user_ctx:=NULL
+//host функции чтение памяти,запись памяти,вызов пользовательских процедур
 struct embedvm_s vm = {
 	0xffff, 0, 0, NULL,
 	&mem_read, &mem_write, &call_user
@@ -77,7 +83,7 @@ int main(int argc, char **argv)
 {
 	FILE *f;
 	int ch, addr;
-	char *prog = argv[0];
+	char *prog = argv[0];// Имя проги - байт интерпритатора
 	bool verbose = false;
 
 	if (argc >= 2 && !strcmp(argv[1], "-v")) {
@@ -91,13 +97,13 @@ exit_with_helpmsg:
 		return 1;
 	}
 
-	memset(memory, 0, sizeof(memory));
-	f = fopen(argv[1], "rb");
+	memset(memory, 0, sizeof(memory)); // память размером 65_536 байт - 'зануляем'
+	f = fopen(argv[1], "rb");//f:FILE открываем байт файл
 	if (!f)
 		goto exit_with_helpmsg;
-	for (addr = 0; (ch = fgetc(f)) != -1; addr++)
+	for (addr = 0; (ch = fgetc(f)) != -1; addr++) // считываем байт-файл в память
 		memory[addr] = ch;
-	fclose(f);
+	fclose(f); // закрываем байт-файл
 
 	embedvm_interrupt(&vm, strtol(argv[2], NULL, 16));
 
