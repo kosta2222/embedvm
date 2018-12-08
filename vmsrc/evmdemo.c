@@ -23,24 +23,25 @@
 #include <stdio.h>
 
 #define UNUSED __attribute__((unused))
-
+// глобальная,флаг остановки интерпритации инструкций
 static bool stop;
 // Байт интерпритатор адресуется 64K памяти = 65_536 байт
 static uint8_t memory[64*1024];// память размером 65_536 байт
-
+// считываем из памяти по адресу addr:UI16
 static int16_t mem_read(uint16_t addr, bool is16bit, void *ctx UNUSED)
 {
 	if (is16bit)
 		return (memory[addr] << 8) | memory[addr+1];
 	return memory[addr];// :I16 - значение  по адресу addr
 }
-
+// записывам value на адрес addr
 static void mem_write(uint16_t addr, int16_t value, bool is16bit, void *ctx UNUSED)
 {
 	if (is16bit) {
 		memory[addr] = value >> 8;
 		memory[addr+1] = value;
 	} else
+            // пишем по адресу addr:UI16 значение value:I16
 		memory[addr] = value;
 }
 
@@ -57,7 +58,7 @@ static int16_t call_user(uint8_t funcid, uint8_t argc, int16_t *argv, void *ctx 
 	}
 
 	printf("Called user function %d with %d args:", funcid, argc);
-
+        // копирование аргументов argv:I16 * в ret:I16 как сумму 
 	for (i = 0; i < argc; i++) {
 		printf(" %d", argv[i]);
 		ret += argv[i];

@@ -19,7 +19,8 @@
 
 #include "embedvm.h"
 // Используем часть значения(val),которая покрыта маской(mask)(required to be all zeros
-//followed by all ones) as a signed value (two's complement)"""
+//followed by all ones) as a signed value (two's complement)
+//signext может выделять 3х,4х битовый аргумент как знаковый для опкодов.
 
 static inline int16_t signext(uint16_t val, uint16_t mask)
 {
@@ -28,7 +29,7 @@ static inline int16_t signext(uint16_t val, uint16_t mask)
 		val |= ~mask;
 	return val;
 }
-// extern func_ispoln1InstrVm_sPtrStrctEmbedvm_sRV
+// extern func_ispoln1InstrVm_sPtrStrctEmbedvmRV
 extern void embedvm_exec(struct embedvm_s *vm)
 {   // Получаем значение:UI8 - число опкод-операции из памяти ,которая выделена в host окружении,в файле evmdemo.c 
     //посредством 'выделения' из структуры,компаненты байт-интерпритатора ip и user_ctx,которая выделена и 
@@ -54,9 +55,7 @@ extern void embedvm_exec(struct embedvm_s *vm)
 	case 0x80+0 ... 0x80+11:.//случай(128...139)(dec)
 
 	case 0xa8+0 ... 0xa8+5: 
-/*
-            //случай  (168...173)(dec) сложение,вычитание,умножение,деление,деление по модулю(выявление остатка)
-*/
+
 
 		b = embedvm_pop(vm);
 	case 0x80+12 ... 0x80+14:
@@ -295,6 +294,7 @@ void embedvm_interrupt(struct embedvm_s *vm, uint16_t addr)
 }
 // func_staskivaetSoSteksVm_sPtrStrctEmbedvmRI2
 // f принимает компанент байт-интерпритатора и 'вытскивает' оттуда sp, user_ctx
+//снимает со стека
 int16_t embedvm_pop(struct embedvm_s *vm)
 {    
     // по адресу выраженному через sp получаем значение - это значение элемента с вершины стека:I16
@@ -304,6 +304,7 @@ int16_t embedvm_pop(struct embedvm_s *vm)
 }
 // func_zatalkivaetNaStekZnach_sPtrStrctEmbedvmI2RI2
 // f принимает компанент байт-интерпритатора и 'вытскивает' оттуда sp, user_ctx
+//ложит на стек
 void embedvm_push(struct embedvm_s *vm, int16_t value)
 {
 	vm->sp -= 2;
