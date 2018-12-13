@@ -101,25 +101,25 @@ extern void embedvm_exec(struct embedvm_s *vm)
     //Проверяем принадлежност опкода к диапазону [144...151] 
     //ложит непосредственно значение на стек  
 	case 0x90 ... 0x97:
-    //(!!!)//маска 0x07 говорит что непосредственно значение (a)
-    //закодирована (3)-мя бит т е максимальное положительное значение будет число (3) ???(ведь бинарное максимальное 0b011)
+   //маска 0x07 говорит что непосредственно значение (a)
+    //закодирована (3)-мя бит т е максимальное положительное значение будет число (3)
 		a = signext(opcode, 0x07);
 		if ((a & 0x04) != 0)
 			a |= ~0x07;
 		embedvm_push(vm, a);
 		vm->ip++;
 		break;
-	case 0x98:
+	case 0x98: // ложит в стек безнаковый 1 байт:UI8
 		a = vm->mem_read(vm->ip+1, false, vm->user_ctx) & 0x00ff;
 		embedvm_push(vm, a);
 		vm->ip += 2;
 		break;
-	case 0x99:
+	case 0x99: // ложит в стек знаковый 1 байт:I8
 		a = vm->mem_read(vm->ip+1, false, vm->user_ctx) & 0x00ff;
 		embedvm_push(vm, signext(a, 0x00ff));
 		vm->ip += 2;
 		break;
-	case 0x9a:
+	case 0x9a:  // ложит в стек знаковый 2 байт:I16
 		a = vm->mem_read(vm->ip+1, true, vm->user_ctx);
 		embedvm_push(vm, a);
 		vm->ip += 3;

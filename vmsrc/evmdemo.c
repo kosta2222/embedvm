@@ -29,14 +29,16 @@ static bool stop;
 static uint8_t memory[64*1024];// память размером 65_536 байт
 // считываем из памяти по адресу addr:UI16
 static int16_t mem_read(uint16_t addr, bool is16bit, void *ctx UNUSED)
-{
+{       //собираем полное число по little-endian принципу
 	if (is16bit)
+                //старший байт 'соеденяется' с младшим байтом
 		return (memory[addr] << 8) | memory[addr+1];
 	return memory[addr];// :I16 - значение  по адресу addr
 }
 // записывам value на адрес addr
 static void mem_write(uint16_t addr, int16_t value, bool is16bit, void *ctx UNUSED)
-{
+{       //пишем в память по little-endian принципу-старшию часть числа на меньший адрес,
+        //остальная младшая часть 'влезает' на больший адрес
 	if (is16bit) {
 		memory[addr] = value >> 8;
 		memory[addr+1] = value;
